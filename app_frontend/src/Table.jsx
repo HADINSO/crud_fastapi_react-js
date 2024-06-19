@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import axios from 'axios';
+import axios from "axios";
 import Loader from "./Components/Loader";
 import AddPersonModal from "./Components/AddPersonModal";
 
 const Table = () => {
-  const [personas, setPersonas] = useState([]);
+  const [persona, setPersona] = useState(null);
   const [loader, setLoader] = useState(false);
   const [error, setError] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [personas, setPersonas] = useState([]);
 
   const Contenido = ({ persona }) => {
     return (
@@ -17,30 +18,14 @@ const Table = () => {
         <td>{persona.created_at}</td>
         <td>{persona.updated_at}</td>
         <td>
-          <a
-            href="#editEmployeeModal"
-            className="edit"
-            data-toggle="modal"
-          >
-            <i
-              className="material-icons"
-              data-toggle="tooltip"
-              title="Edit"
-            >
-              &#xE254;
+          <a href="#editEmployeeModal" className="edit" data-toggle="modal">
+            <i className="material-icons" data-toggle="tooltip" title="Edit">
+              
             </i>
           </a>
-          <a
-            href="#deleteEmployeeModal"
-            className="delete"
-            data-toggle="modal"
-          >
-            <i
-              className="material-icons"
-              data-toggle="tooltip"
-              title="Delete"
-            >
-              &#xE872;
+          <a href="#deleteEmployeeModal" className="delete" data-toggle="modal">
+            <i className="material-icons" data-toggle="tooltip" title="Delete">
+              
             </i>
           </a>
         </td>
@@ -61,13 +46,13 @@ const Table = () => {
               </div>
               {/* Boton para modal de agregar persona */}
               <div className="col-xs-6">
-                <button 
+                <a
                   className="btn btn-success"
                   onClick={() => setModalIsOpen(true)}
                 >
-                  <i className="material-icons">&#xE147;</i>{" "}
+                  <i className="material-icons"></i>{" "}
                   <span>Agregar persona</span>
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -81,11 +66,7 @@ const Table = () => {
                 <th>Acciones</th>
               </tr>
             </thead>
-            <tbody>
-              {personas.map((persona) => (
-                <Contenido key={persona.id} persona={persona} />
-              ))}
-            </tbody>
+            <tbody>{persona && <Contenido persona={persona} />}</tbody>
           </table>
         </div>
       </div>
@@ -93,9 +74,10 @@ const Table = () => {
   };
 
   useEffect(() => {
-    axios.get(`http://127.0.0.1:8000/personas/`)
+    axios
+      .get("http://127.0.0.1:8000/personas/")
       .then((response) => {
-        setPersonas(response.data);
+        setPersona(response.data);
         setLoader(true);
       })
       .catch((error) => {
@@ -103,11 +85,9 @@ const Table = () => {
         setLoader(true);
       });
   }, []);
-
   const handlePersonAdded = (newPerson) => {
     setPersonas([...personas, newPerson]);
   };
-
   if (loader) {
     if (error) {
       return <div>Error: {error}</div>;
@@ -115,15 +95,15 @@ const Table = () => {
     return (
       <>
         <Tabla />
-        <AddPersonModal 
-          isOpen={modalIsOpen} 
-          onRequestClose={() => setModalIsOpen(false)} 
+        <AddPersonModal
+          isOpen={modalIsOpen}
+          onRequestClose={() => setModalIsOpen(false)}
           onPersonAdded={handlePersonAdded}
         />
       </>
     );
   } else {
-    return (<Loader />);
+    return <Loader />;
   }
 };
 

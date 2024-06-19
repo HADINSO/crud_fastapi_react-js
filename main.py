@@ -1,23 +1,23 @@
-# main.py
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import Optional
-from database import SessionLocal, engine
-from fastapi.middleware.cors import CORSMiddleware
 import models, schemas
+from database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-
+# Middleware para permitir CORS
+from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Puedes especificar una lista de orígenes permitidos en lugar de ["*"]
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Función para obtener la sesión de base de datos
 def get_db():
     db = SessionLocal()
     try:
@@ -25,7 +25,8 @@ def get_db():
     finally:
         db.close()
 
-@app.post("/personas/", response_model=schemas.Persona)
+# Operaciones CRUD para Persona
+@app.post("/personas", response_model=schemas.Persona)
 def create_persona(persona: schemas.PersonaCreate, db: Session = Depends(get_db)):
     db_persona = models.Persona(**persona.dict())
     db.add(db_persona)
@@ -33,9 +34,16 @@ def create_persona(persona: schemas.PersonaCreate, db: Session = Depends(get_db)
     db.refresh(db_persona)
     return db_persona
 
-@app.get("/personas/", response_model=Optional[schemas.Persona])
+@app.get("/personas", response_model=schemas.Persona)
 def read_persona(db: Session = Depends(get_db)):
     persona = db.query(models.Persona).first()
+    if persona is None:
+        raise HTTPException(status_code=404, detail="Persona not found")
+    return persona
+
+@app.get("/personas/{persona_id}", response_model=schemas.Persona)
+def read_persona(persona_id: int, db: Session = Depends(get_db)):
+    persona = db.query(models.Persona).filter(models.Persona.id == persona_id).first()
     if persona is None:
         raise HTTPException(status_code=404, detail="Persona not found")
     return persona
