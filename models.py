@@ -1,13 +1,9 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String
 from database import Base
-import datetime
 
 class Persona(Base):
-    __tablename__ = "personas"
+    __tablename__ = "persona"
 
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(255), index=True)
     apellido = Column(String(255), index=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
-    user_id = Column(Integer, index=True)
